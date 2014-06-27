@@ -981,7 +981,6 @@ public class MobileNetworkSettings extends PreferenceActivity
         private void handleSetPreferredNetworkTypeResponse(Message msg) {
             AsyncResult ar = (AsyncResult) msg.obj;
             final int phoneSubId = mPhone.getSubId();
-            int networkMode;
 
             if (ar.exception == null) {
                 int networkMode = Integer.valueOf(
