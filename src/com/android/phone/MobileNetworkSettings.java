@@ -832,12 +832,21 @@ public class MobileNetworkSettings extends PreferenceActivity
                 mButtonEnabledNetworks.setSummary(R.string.network_lte);
                 break;
             case Phone.NT_MODE_CDMA:
+		if (SystemProperties.getInt("ro.telephony.toroRIL", 0) == 1) {
+ 		    mButtonEnabledNetworks.setValue(Integer.toString(Phone.NT_MODE_CDMA));
+   		    mButtonEnabledNetworks.setSummary(R.string.network_3G);
+ 		    break;
+ 		}
             case Phone.NT_MODE_EVDO_NO_CDMA:
             case Phone.NT_MODE_GLOBAL:
-                mButtonEnabledNetworks.setValue(
-                        Integer.toString(Phone.NT_MODE_CDMA));
-                mButtonEnabledNetworks.setSummary(R.string.network_3G);
-                break;
+		if (SystemProperties.getInt("ro.telephony.toroRIL", 0) == 1) {
+		    mButtonEnabledNetworks.setValue(Integer.toString(Phone.NT_MODE_GLOBAL));
+		    mButtonEnabledNetworks.setSummary(R.string.network_lte);
+		} else {
+		    mButtonEnabledNetworks.setValue(Integer.toString(Phone.NT_MODE_CDMA));
+		    mButtonEnabledNetworks.setSummary(R.string.network_3G);
+		}
+                    break;
             case Phone.NT_MODE_CDMA_NO_EVDO:
                 mButtonEnabledNetworks.setValue(
                         Integer.toString(Phone.NT_MODE_CDMA_NO_EVDO));
