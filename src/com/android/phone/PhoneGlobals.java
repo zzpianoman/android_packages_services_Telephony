@@ -845,6 +845,12 @@ public class PhoneGlobals extends ContextWrapper {
                 for (Phone ph : mPhones) {
                     ph.setRadioPower(enabled);
                 }
+		// Fix for no data out of airplane mode on Toro.. 
+        	if (enabled) {
+		    if (SystemProperties.getInt("ro.telephony.toro_apm_fix", 0) == 1) {
+		     	android.os.Process.killProcess(android.os.Process.myPid());	
+		    }
+		}
             } else if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 if (VDBG) Log.d(LOG_TAG, "mReceiver: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED");
                 if (VDBG) Log.d(LOG_TAG, "- state: " + intent.getStringExtra(PhoneConstants.STATE_KEY));
