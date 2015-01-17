@@ -812,7 +812,7 @@ public class PhoneGlobals extends ContextWrapper {
                 }
 		// Fix for no data out of airplane mode on Toro.. 
         	if (enabled) {
-		    if (SystemProperties.getInt("ro.telephony.toroRIL", 0) == 1) {
+		    if (SystemProperties.getInt("ro.telephony.toro_apm_fix", 0) == 1) {
 		     	android.os.Process.killProcess(android.os.Process.myPid());	
 		    }
 		}
