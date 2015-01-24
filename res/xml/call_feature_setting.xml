@@ -32,6 +32,13 @@
         android:title="@string/voicemail"
         android:persistent="false">
 
+      <SwitchPreference
+            android:defaultValue="false"
+            android:key="button_mwi_notification_key"
+            android:title="@string/mwi_notification_title"
+            android:persistent="false"
+            android:summary="@string/mwi_notification_summary" />
+
         <ListPreference
             android:key="button_voicemail_provider_key"
             android:title="@string/voicemail_provider"
@@ -164,7 +171,6 @@
         android:persistent="false" />
         <PreferenceScreen
             android:key="videocall_setting_fb_key"
-            android:summary="@string/vt_fallback_setting_sum"
             android:title="@string/vt_fallback_setting" >
             <intent
                 android:action="android.intent.action.MAIN"
@@ -173,7 +179,6 @@
         </PreferenceScreen>
         <PreferenceScreen
             android:key="videocall_setting_fw_key"
-            android:summary="@string/vt_forward_setting_sum"
             android:title="@string/vt_forward_setting"
             android:persistent="false" >
             <intent
