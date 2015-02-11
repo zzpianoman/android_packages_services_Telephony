@@ -330,6 +330,7 @@ public class PhoneGlobals extends ContextWrapper {
         if (mCM == null) {
             // Initialize the telephony framework
             PhoneFactory.makeDefaultPhones(this);
+            sendBroadcast(new Intent("com.android.phone.ACTION_PHONE_READY"));
 
             // Start TelephonyDebugService After the default phone is created.
             Intent intent = new Intent(this, TelephonyDebugService.class);
