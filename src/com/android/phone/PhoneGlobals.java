@@ -26,7 +26,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -43,6 +45,7 @@ import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallManager;
@@ -182,10 +185,16 @@ public class PhoneGlobals extends ContextWrapper {
 
     // Broadcast receiver for various intent broadcasts (see onCreate())
     private final BroadcastReceiver mReceiver = new PhoneAppBroadcastReceiver();
-
+    
     /** boolean indicating restoring mute state on InCallScreen.onResume() */
     private boolean mShouldRestoreMuteOnInCallResume;
 
+    private final MediaSession mSession = new MediaSession(this, "legacymute");
+
+    private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+            .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION).build();
+    
     /**
      * The singleton OtaUtils instance used for OTASP calls.
      *
@@ -440,7 +449,14 @@ public class PhoneGlobals extends ContextWrapper {
             intentFilter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
             intentFilter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
             registerReceiver(mReceiver, intentFilter);
-
+   
+	    // Set MediaSession Callback to handle headset button press for legacy in-call
+     	    // mute functionality, but don't start it yet
+            mSession.setCallback(mSessionCallback);
+	    mSession.setFlags(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY
+                	    | MediaSession.FLAG_HANDLES_MEDIA_BUTTONS);
+	    mSession.setPlaybackToLocal(AUDIO_ATTRIBUTES);
+	    
             //set the default values for the preferences in the phone.
             PreferenceManager.setDefaultValues(this, R.xml.network_setting, false);
 
@@ -477,7 +493,7 @@ public class PhoneGlobals extends ContextWrapper {
                                       CallFeaturesSetting.HAC_VAL_OFF);
         }
     }
-
+   
     /**
      * Returns the singleton instance of the PhoneApp.
      */
@@ -887,7 +903,35 @@ public class PhoneGlobals extends ContextWrapper {
                         Intent.EXTRA_DOCK_STATE_UNDOCKED);
                 if (VDBG) Log.d(LOG_TAG, "ACTION_DOCK_EVENT -> mDockState = " + mDockState);
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_DOCK_STATE_CHANGED, 0));
+            } 
+        }
+    }
+
+    private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
+        @Override
+        public boolean onMediaButtonEvent(final Intent intent) {
+            KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            Log.d(LOG_TAG, "SessionCallback.onMediaButton()");
+            if ((event != null) && (event.getKeyCode() == KeyEvent.KEYCODE_HEADSETHOOK)) {
+                Log.d(LOG_TAG, "SessionCallback: HEADSETHOOK");
+                boolean consumed = PhoneUtils.handleHeadsetHook(phone, event);
+                Log.d(LOG_TAG, "==> handleHeadsetHook(): consumed");
+                return consumed;
             }
+            return true;
+        }
+    };
+
+    public void addHeadsetCallback() {
+        if (!mSession.isActive()) {
+            mSession.setActive(true);
+        }
+    }
+
+    
+    public void removeHeadsetCallback() {
+        if (mSession.isActive()) {
+            mSession.setActive(false);
         }
     }
 

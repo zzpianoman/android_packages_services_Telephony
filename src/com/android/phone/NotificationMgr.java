@@ -48,6 +48,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.internal.telephony.CallManager;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.PhoneFactory;
@@ -93,12 +94,14 @@ public class NotificationMgr {
     private static NotificationMgr sInstance;
 
     private PhoneGlobals mApp;
+    protected CallManager mCM;
 
     private Context mContext;
     private NotificationManager mNotificationManager;
     private StatusBarManager mStatusBarManager;
     private UserManager mUserManager;
     private Toast mToast;
+    private boolean mShowingMuteIcon;
 
     public StatusBarHelper statusBarHelper;
 
@@ -122,6 +125,7 @@ public class NotificationMgr {
         mStatusBarManager =
                 (StatusBarManager) app.getSystemService(Context.STATUS_BAR_SERVICE);
         mUserManager = (UserManager) app.getSystemService(Context.USER_SERVICE);
+	mCM = app.mCM;
         statusBarHelper = new StatusBarHelper();
     }
 
@@ -277,7 +281,51 @@ public class NotificationMgr {
         PhoneLookup._ID
     };
 
+    protected void notifyMute() {
+        if (!mShowingMuteIcon) {
+            mStatusBarManager.setIcon("mute", android.R.drawable.stat_notify_call_mute, 0,
+                    mContext.getString(R.string.accessibility_call_muted));
+            mShowingMuteIcon = true;
+        }
+    }
 
+    protected void cancelMute() {
+        if (mShowingMuteIcon) {
+            mStatusBarManager.removeIcon("mute");
+            mShowingMuteIcon = false;
+        }
+    }
+
+    /**
+     * Shows or hides the "mute" notification in the status bar,
+     * based on the current mute state of the Phone.
+     *
+     * (But note that the status bar icon is *never* shown while the in-call UI
+     * is active; it only appears if you bail out to some other activity.)
+     */
+    void updateMuteNotification() {
+        // Suppress the status bar icon if the the InCallScreen is the
+        // foreground activity, since the in-call UI already provides an
+        // onscreen indication of the mute state.  (This reduces clutter
+        // in the status bar.)
+
+        if ((mCM.getState() == PhoneConstants.State.OFFHOOK) && PhoneUtils.getMute()) {
+            if (DBG) log("updateMuteNotification: MUTED");
+            notifyMute();
+        } else {
+            if (DBG) log("updateMuteNotification: not muted (or not offhook)");
+            cancelMute();
+        }
+    }
+
+    /**
+     * Completely take down the in-call notification *and* the mute/speaker
+     * notifications as well, to indicate that the phone is now idle.
+     */
+    /* package */ void cancelCallInProgressNotifications() {
+        if (DBG) log("cancelCallInProgressNotifications");
+        cancelMute();
+    }
 
     /**
      * Updates the message waiting indicator (voicemail) notification.
