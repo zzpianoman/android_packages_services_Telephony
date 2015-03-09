@@ -101,6 +101,7 @@
     <uses-permission android:name="android.permission.READ_SEARCH_INDEXABLES" />
     <uses-permission
             android:name="com.android.server.telecom.permission.REGISTER_PROVIDER_OR_SUBSCRIPTION" />
+    <uses-permission android:name="android.permission.HARDWARE_ABSTRACTION_ACCESS" />
 
     <!-- This tells the activity manager to not delay any of our activity
          start requests, even if they happen immediately after the user
@@ -119,6 +120,13 @@
                       android:exported="true"
                       android:readPermission="android.permission.READ_CONTACTS"
                       android:writePermission="android.permission.WRITE_CONTACTS" />
+
+        <!-- Workaround for non saved phone number -->
+        <receiver android:name=".MyPhoneNumber">
+            <intent-filter>
+                <action android:name="android.intent.action.SIM_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Dialer UI that only allows emergency calls -->
         <activity android:name="EmergencyDialer"
