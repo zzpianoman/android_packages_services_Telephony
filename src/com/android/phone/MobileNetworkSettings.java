@@ -527,6 +527,7 @@ public class MobileNetworkSettings extends PreferenceActivity
                     case Phone.NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
                     case Phone.NT_MODE_CDMA:
                     case Phone.NT_MODE_CDMA_NO_EVDO:
+                    case Phone.NT_MODE_GLOBAL:
                     case Phone.NT_MODE_LTE_CDMA_AND_EVDO:
                         // This is one of the modes we recognize
                         modemNetworkMode = buttonNetworkMode;
@@ -943,9 +944,16 @@ public class MobileNetworkSettings extends PreferenceActivity
                         Integer.toString(Phone.NT_MODE_LTE_CDMA_AND_EVDO));
                 mButtonEnabledNetworks.setSummary(R.string.network_lte);
                 break;
+            case Phone.NT_MODE_GLOBAL:
+                // Workaround: toro's RIL thinks GLOBAL is LTE_CDMA_AND_EVDO.
+                if (SystemProperties.get("ro.product.device").equals("toro")) {
+                    mButtonEnabledNetworks.setValue(
+                            Integer.toString(Phone.NT_MODE_GLOBAL));
+                    mButtonEnabledNetworks.setSummary(R.string.network_lte);
+                    break;
+                }
             case Phone.NT_MODE_CDMA:
             case Phone.NT_MODE_EVDO_NO_CDMA:
-            case Phone.NT_MODE_GLOBAL:
                 mButtonEnabledNetworks.setValue(
                         Integer.toString(Phone.NT_MODE_CDMA));
                 mButtonEnabledNetworks.setSummary(R.string.network_3G);
