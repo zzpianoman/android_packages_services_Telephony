@@ -569,6 +569,9 @@ public class MobileNetworkSettings extends PreferenceActivity
             }  else if (mButtonEnabledNetworks != null) {
                 mButtonEnabledNetworks.setEnabled(false);
             }
+        } else {
+            mPhone.setPreferredNetworkType(modemNetworkMode, mHandler
+                        .obtainMessage(MyHandler.MESSAGE_SET_PREFERRED_NETWORK_TYPE));
         }
     }
 
