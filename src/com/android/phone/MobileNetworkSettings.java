@@ -563,6 +563,10 @@ public class MobileNetworkSettings extends PreferenceActivity
                     R.string.network_4G);
             mEnabledNetworksSummaries.append(Phone.NT_MODE_LTE_CDMA_AND_EVDO,
                     R.string.network_4G);
+            if (SystemProperties.get("ro.product.device").equals("toro")) {
+                mEnabledNetworksSummaries.append(Phone.NT_MODE_GLOBAL,
+                       R.string.network_4G);
+            }
         } else {
             mEnabledNetworksSummaries.append(Phone.NT_MODE_LTE_GSM_WCDMA,
                     R.string.network_lte_gsm_wcdma);
@@ -572,6 +576,10 @@ public class MobileNetworkSettings extends PreferenceActivity
                     R.string.network_lte_only);
             mEnabledNetworksSummaries.append(Phone.NT_MODE_LTE_CDMA_AND_EVDO,
                     R.string.network_lte_cdma_and_evdo);
+            if (SystemProperties.get("ro.product.device").equals("toro")) {
+                mEnabledNetworksSummaries.append(Phone.NT_MODE_GLOBAL,
+                       R.string.network_lte_cdma);
+            }
         }
     }
 
